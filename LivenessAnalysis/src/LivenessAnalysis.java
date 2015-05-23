@@ -7,14 +7,22 @@ import java.io.InputStreamReader;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.*;
+
+/* Git push: Fixed duplicates */
 
 public class LivenessAnalysis {
 
 	public static void main(String args[]) throws IOException {
-        String file = args[0];
-        //"./test";
+        String file = 
+        //args[0];
+        "./test";
 		ArrayList<Node> nodes = new ArrayList<Node>();
 		HashMap<Integer, Node> headNodes = new HashMap<Integer, Node>();
 
@@ -28,7 +36,18 @@ public class LivenessAnalysis {
             
         }*/
 		propigateLive(nodes);
+	
+		
+		for(Node node: nodes)
+		{
+			node.liveAfter = clearDuplicates(node.liveAfter);
+			node.liveBefore = clearDuplicates(node.liveBefore);
+		}
+
+		
+		
 		printLiveness(nodes);
+		
 		
 		
 		/*
@@ -40,6 +59,26 @@ public class LivenessAnalysis {
 		 * 
 		 * }
 		 */
+	}
+
+	private static ArrayList<String> clearDuplicates(ArrayList<String> elements)
+	{
+		ArrayList<String> al = new ArrayList<>();
+		// add elements to al, including duplicates
+		Set<String> hs = new HashSet<>();
+		hs.addAll(elements);
+		al.clear();
+		al.addAll(hs);
+
+		Collections.sort(al,
+                new Comparator<String>()
+                {
+                    public int compare(String f1, String f2)
+                    {
+                        return f1.toString().compareTo(f2.toString());
+                    }        
+                });
+		return al;
 	}
 
 	private static void printLiveness(ArrayList<Node> nodes) {
