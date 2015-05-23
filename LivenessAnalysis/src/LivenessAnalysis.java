@@ -20,8 +20,7 @@ import java.util.regex.*;
 public class LivenessAnalysis {
 
 	public static void main(String args[]) throws IOException {
-        String file = 
-        args[0];
+        String file = args[0];
         //"./test";
 		ArrayList<Node> nodes = new ArrayList<Node>();
 		HashMap<Integer, Node> headNodes = new HashMap<Integer, Node>();
@@ -160,6 +159,7 @@ public class LivenessAnalysis {
 		// VARIABLE PATTER
 		//String variablePatternString = "( [a-z] | [A-Z] )";
 		String variablePatternString = "( [a-z] | [A-Z] )|( [a-z]$| [A-Z]$)";
+
 		// TOKEN PATTERNS
 		String ifPatternString = "(^ if)";
 		String gotoPatternString = "(^ goto)";
