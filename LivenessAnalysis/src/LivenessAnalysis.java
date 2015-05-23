@@ -23,7 +23,7 @@ public class LivenessAnalysis
 	public static void main(String args[]) throws IOException
 	{
 		String file =
-		 args[0];
+		args[0];
 		//"./test";
 		ArrayList<Node> nodes = new ArrayList<Node>();
 		HashMap<Integer, Node> headNodes = new HashMap<Integer, Node>();
@@ -169,12 +169,12 @@ public class LivenessAnalysis
 		String endVariablePatternString = "( [a-z]| [A-Z])";
 		
 		// TOKEN PATTERNS
-		String ifPatternString = "(^ if)";
-		String gotoPatternString = "(^ goto)";
-		String assignmentPatternString = "([a-z]|[A-Z]) :=.*";
+		String ifPatternString = "(^ if)|(^if)";
+		String gotoPatternString = "(^ goto)|(^goto)";
+		String assignmentPatternString = "((^[a-z]|[A-Z]) :=.*)|((^ [a-z]|[A-Z]) :=.*)";
 		String labelPatternString = "^Label.*";
 		String labelNumberPatternString = "(?<=Label)\\d+";
-		String endLivePatternString = "(^ #)";
+		String endLivePatternString = "(^ #)|(^#)";
 		
 		Pattern ifPattern = Pattern.compile(ifPatternString);
 		Pattern gotoPattern = Pattern.compile(gotoPatternString);
@@ -250,20 +250,13 @@ public class LivenessAnalysis
 				node = new Node();
 				node.value = strLine;
 				node.type = Node.Type.assignType;
-				
 				int count = 0;
 				while (variableMatcher.find())
 				{
-					if (count == 0)
-					{
-						node.variable = (String) variableMatcher.group(1).replace(" ", "");
-					}
-					else
-					{
 						String variable = variableMatcher.group(0).replace(" ", "");
 						node.liveBefore.add(variable);
 						node.readVariables.add(variable);
-					}
+					
 					count++;
 				}
 			}
