@@ -99,7 +99,7 @@ public class LivenessAnalysis {
 				System.out.println("because of " + node.value + " adding: " + node.liveBefore + " to " + pNode.value);
 				pNode.liveAfter.addAll(node.liveBefore);
                 
-                if(pNode.liveAfter.contains(node.variable)){
+                if(pNode.liveAfter.contains(node.variable) && !node.readVariables.contains(node.variable)){
                     pNode.liveAfter.remove(node.variable);
                 }
 			}
