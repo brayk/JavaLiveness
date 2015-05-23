@@ -158,7 +158,7 @@ public class LivenessAnalysis {
 		int lnNu = 0;
 
 		// VARIABLE PATTER
-		String variablePatternString = "([a-z]|[A-Z])";
+		String variablePatternString = "[[^a-z]|[^A-Z]|^:=|[^0-9]]*([a-z]|[A-Z])[[^a-z]|[^A-Z]|^:|^=|[^0-9]]*";
 		// TOKEN PATTERNS
 		String ifPatternString = "(^ if)";
 		String gotoPatternString = "(^ goto)";
