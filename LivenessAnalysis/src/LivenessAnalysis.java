@@ -1,7 +1,16 @@
+// 3798 & 3953
+// ==========
+// LivenessAnalysis.java:
+// - Checks the liveness for a program
+// - Supports if-statements, labels, gotos, and assignments
+//
+// Usage:
+// c: javac LivenessAnalysis.java
+// r: java LivenessAnalysis input
+// ///////////////////////////////////////
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.DecimalFormat;
@@ -10,28 +19,35 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.regex.*;
-
-/* Git push: FIXED ALL ENDLIVENESS */
 
 public class LivenessAnalysis
 {
 	
 	public static void main(String args[]) throws IOException
 	{
-		String file =
-		args[0];
-		//"./test";
+		// File name from command line
+		String file = args[0];
+		
+		// Data structure to hold the structure of the program and node information
 		ArrayList<Node> nodes = new ArrayList<Node>();
+		
+		// Lookup dictionary for the Labels
 		HashMap<Integer, Node> headNodes = new HashMap<Integer, Node>();
 		
+		// Building the nodes
 		nodes = buildNodes(file);
+		
+		// putting the labels in the lookup table
 		headNodes = buildHeadNodes(nodes);
+		
+		// link the nodes based on goto
 		buildPrevious(nodes, headNodes);
-		propigateLive(nodes);
+		
+		// propagate the liveness rules
+		propagateLive(nodes);
+		
 		// Clear duplicates and order the live strings
 		for (Node node : nodes)
 		{
@@ -39,26 +55,20 @@ public class LivenessAnalysis
 			node.liveBefore = clearDuplicates(node.liveBefore);
 		}
 		
+		// print nodes and their liveness
 		printLiveness(nodes);
-		
-		/*
-		 * System.out.println("THIS LINE: " + nodes.get(nodes.size() -
-		 * 1).value);
-		 * for (Node node : nodes) { System.out.println(node.value);
-		 * System.out.println(node.prev);
-		 * }
-		 */
 	}
 	
 	private static ArrayList<String> clearDuplicates(ArrayList<String> elements)
 	{
 		ArrayList<String> al = new ArrayList<>();
-		// add elements to al, including duplicates
+		
+		// Add elements to hs to remove duplicates
 		Set<String> hs = new HashSet<>();
 		hs.addAll(elements);
 		al.clear();
 		al.addAll(hs);
-		
+		// Sort the elements after
 		Collections.sort(al, new Comparator<String>()
 		{
 			public int compare(String f1, String f2)
@@ -83,7 +93,7 @@ public class LivenessAnalysis
 		
 	}
 	
-	private static void propigateLive(ArrayList<Node> nodes)
+	private static void propagateLive(ArrayList<Node> nodes)
 	{
 		Collections.reverse(nodes);
 		for (Node node : nodes)
@@ -91,7 +101,7 @@ public class LivenessAnalysis
 			node.liveBefore.addAll(node.liveAfter);
 			for (Node pNode : node.prev)
 			{
-				System.out.println("because of " + node.value + " adding: " + node.liveBefore + " to " + pNode.value);
+				// Adding the nodes that are live before a previous node but making sure it does not exist in the read variables
 				pNode.liveAfter.addAll(node.liveBefore);
 				
 				if (pNode.liveAfter.contains(node.variable) && !node.readVariables.contains(node.variable))
@@ -100,6 +110,7 @@ public class LivenessAnalysis
 				}
 			}
 			
+			// Make sure to remove variables that are in the non read for the before as well
 			if (node.liveBefore.contains(node.variable) && !node.readVariables.contains(node.variable))
 			{
 				node.liveBefore.removeAll(Collections.singleton(node.variable));
@@ -122,7 +133,6 @@ public class LivenessAnalysis
 				{
 					Node nextNode = nodes.get(nodeIndex + 1);
 					nextNode.prev.add(node);
-					// System.out.println("adding: " + node.value + " as previous to " + nextNode.value);
 				}
 			}
 			
@@ -131,13 +141,13 @@ public class LivenessAnalysis
 			{
 				Node headNode = headNodes.get(node.gotoNumber);
 				headNode.prev.add(node);
-				// System.out.println("adding: " + node.value + " as previous to " + headNode.value);
 			}
 		}
 	}
 	
 	private static HashMap<Integer, Node> buildHeadNodes(ArrayList<Node> nodes)
 	{
+		// Builds a set of nodes in a map so it can be collected via the label key/number
 		HashMap<Integer, Node> headNodes = new HashMap<Integer, Node>();
 		for (Node node : nodes)
 		{
@@ -146,7 +156,6 @@ public class LivenessAnalysis
 				headNodes.put(node.labelNumber, node);
 			}
 		}
-		
 		return headNodes;
 	}
 	
@@ -210,6 +219,9 @@ public class LivenessAnalysis
 			Matcher endVariableMatcher = endVariablePattern.matcher(strLine);
 			Node node = new Node();
 			
+			// BUILD THE NODES
+			
+			// Check if if statement
 			if (ifMatcher.find())
 			{
 				node = new Node();
@@ -230,6 +242,7 @@ public class LivenessAnalysis
 				}
 				
 			}
+			// Check if goto statement
 			if (gotoMatcher.find())
 			{
 				node = new Node();
@@ -245,58 +258,53 @@ public class LivenessAnalysis
 				}
 				
 			}
+			// Check if assignemnt statement
 			if (assignmentMatcher.find())
 			{
 				node = new Node();
 				node.value = strLine;
 				node.type = Node.Type.assignType;
-				int count = 0;
+				// find variables
 				while (variableMatcher.find())
 				{
-						String variable = variableMatcher.group(0).replace(" ", "");
-						node.liveBefore.add(variable);
-						node.readVariables.add(variable);
-					
-					count++;
+					String variable = variableMatcher.group(0).replace(" ", "");
+					node.liveBefore.add(variable);
+					node.readVariables.add(variable);
 				}
 			}
+			// check if label
 			if (labelMatcher.find())
 			{
 				node = new Node();
 				node.value = strLine;
 				node.type = Node.Type.labelType;
+				// find label number
 				if (labelNumberMatcher.find())
 				{
 					String labelNumber = labelNumberMatcher.group(0).replace(" ", "");
 					node.labelNumber = Integer.parseInt(labelNumber);
 				}
 			}
+			// check if endLive token
 			if (endLiveMatcher.find())
 			{
 				node = new Node();
 				node.value = strLine;
 				node.type = Node.Type.endLiveType;
-				System.out.println("endlive node value:" + strLine);
+				
+				// Find variables
 				while (endVariableMatcher.find())
 				{
 					String variable = endVariableMatcher.group(1).replace(" ", "");
 					node.liveBefore.add(variable);
 				}
-				System.out.println("endlive node value:" + strLine);
-				System.out.println(node.liveBefore + " BEFORE ");
+				
 			}
 			
 			nodes.add(node);
 			
 		}
-		
-		// Close the input stream
 		br.close();
-		/*
-		 * for (Node node : nodes) { System.out.println(node.liveBefore);
-		 * System.out.println(node.value);
-		 * }
-		 */
 		return nodes;
 	}
 	
