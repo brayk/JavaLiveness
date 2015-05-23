@@ -21,8 +21,8 @@ public class LivenessAnalysis {
 
 	public static void main(String args[]) throws IOException {
         String file = 
-        //args[0];
-        "./test";
+        args[0];
+        //"./test";
 		ArrayList<Node> nodes = new ArrayList<Node>();
 		HashMap<Integer, Node> headNodes = new HashMap<Integer, Node>();
 
