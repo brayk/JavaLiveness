@@ -158,8 +158,10 @@ public class LivenessAnalysis {
 
 		// VARIABLE PATTER
 		//String variablePatternString = "( [a-z] | [A-Z] )";
-		String variablePatternString = "( [a-z] | [A-Z] )|( [a-z]$| [A-Z]$)";
 
+		//String variablePatternString = "( [a-z] | [A-Z] )|( [a-z]$| [A-Z]$)";
+		String variablePatternString = "( [a-z] | [A-Z] )|( [a-z]$| [A-Z]$)|( [a-z]\\z| [A-Z]\\z)";
+        
 		// TOKEN PATTERNS
 		String ifPatternString = "(^ if)";
 		String gotoPatternString = "(^ goto)";
@@ -242,7 +244,7 @@ public class LivenessAnalysis {
 						node.variable = (String) variableMatcher.group(1)
 								.replace(" ", "");
 					} else {
-						String variable = variableMatcher.group(1).replace(" ",
+						String variable = variableMatcher.group(0).replace(" ",
 								"");
 						node.liveBefore.add(variable);
                         node.readVariables.add(variable);
