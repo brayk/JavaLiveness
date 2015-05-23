@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.*;
 
-/* Git push: Fixed duplicates */
+/* Git push: fixed  dups and removing multiple dups, but not ones read*/
 
 public class LivenessAnalysis {
 
@@ -105,7 +105,7 @@ public class LivenessAnalysis {
 			}
             
             if(node.liveBefore.contains(node.variable) && !node.readVariables.contains(node.variable)){
-                node.liveBefore.remove(node.variable);
+                node.liveBefore.removeAll(Collections.singleton(node.variable));
             }
 		}
 		Collections.reverse(nodes);
