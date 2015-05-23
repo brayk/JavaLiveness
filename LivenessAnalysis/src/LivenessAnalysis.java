@@ -92,7 +92,7 @@ public class LivenessAnalysis {
 				pNode.liveAfter.addAll(node.liveBefore);
                 
                 if(pNode.liveAfter.contains(node.variable) && !node.readVariables.contains(node.variable)){
-                    pNode.liveAfter.remove(node.variable);
+                    pNode.liveAfter.removeAll(Collections.singleton(node.variable));
                 }
 			}
             
