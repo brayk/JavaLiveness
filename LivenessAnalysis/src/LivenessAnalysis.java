@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.*;
 
-/* Git push: fixed  dups and removing multiple dups, but not ones read*/
+/* Git push: FIXED ALL ENDLIVENESS */
 
 public class LivenessAnalysis {
 
@@ -29,15 +29,8 @@ public class LivenessAnalysis {
 		nodes = buildNodes(file);
 		headNodes = buildHeadNodes(nodes);
 		buildPrevious(nodes, headNodes);
-        ArrayList<Node> newNodes = new ArrayList<Node>();
-        /*while(newNodes != nodes){
-            newNodes = nodes.copy();
-            propigateLive(nodes);
-            
-        }*/
-		propigateLive(nodes);
-	
-		
+        propigateLive(nodes);
+        // Clear duplicates and order the live strings
 		for(Node node: nodes)
 		{
 			node.liveAfter = clearDuplicates(node.liveAfter);
@@ -159,7 +152,8 @@ public class LivenessAnalysis {
 
 		// VARIABLE PATTER
 		//String variablePatternString = "( [a-z] | [A-Z] )";
-		String variablePatternString = "( [a-z] | [A-Z] )|( [a-z]$| [A-Z]$)|( [a-z]\\z| [A-Z]\\z)";
+		String variablePatternString = "( [a-z] | [A-Z] )";
+		String endVariablePatternString = "( [a-z]| [A-Z])";
 		// TOKEN PATTERNS
 		String ifPatternString = "(^ if)";
 		String gotoPatternString = "(^ goto)";
@@ -176,6 +170,7 @@ public class LivenessAnalysis {
 		Pattern labelNumberPattern = Pattern.compile(labelNumberPatternString);
         Pattern endLivePattern = Pattern.compile(endLivePatternString);
 		Pattern variablePattern = Pattern.compile(variablePatternString);
+		Pattern endVariablePattern = Pattern.compile(endVariablePatternString);
 
 		// ASSIGNMENT
 
@@ -197,6 +192,7 @@ public class LivenessAnalysis {
 			Matcher labelNumberMatcher = labelNumberPattern.matcher(strLine);
             Matcher endLiveMatcher = endLivePattern.matcher(strLine);
 			Matcher variableMatcher = variablePattern.matcher(strLine);
+			Matcher endVariableMatcher = endVariablePattern.matcher(strLine);
 			Node node = new Node();
 
 			if (ifMatcher.find()) {
@@ -265,11 +261,10 @@ public class LivenessAnalysis {
                 node.value = strLine;
                 node.type = Node.Type.endLiveType;
                 System.out.println("endlive node value:" + strLine);
-                while(variableMatcher.find()) {
-                    String variable = variableMatcher.group(0).replace(" ", "");
-                    node.liveBefore.add(variable);
-                    System.out.println(node.liveBefore + " BEFORE " );
-                }
+                while (endVariableMatcher.find()) {
+					String variable = endVariableMatcher.group(1).replace(" ", "");
+					node.liveBefore.add(variable);
+				}
                 System.out.println("endlive node value:" + strLine);
                 System.out.println(node.liveBefore + " BEFORE " );
             }
