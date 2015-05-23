@@ -104,7 +104,7 @@ public class LivenessAnalysis {
                 }
 			}
             
-            if(node.liveBefore.contains(node.variable)){
+            if(node.liveBefore.contains(node.variable) && !node.readVariables.contains(node.variable)){
                 node.liveBefore.remove(node.variable);
             }
 		}
@@ -206,7 +206,6 @@ public class LivenessAnalysis {
 				while (variableMatcher.find()) {
 					String variable = variableMatcher.group(1).replace(" ", "");
 					node.liveBefore.add(variable);
-					System.out.print("BEFORE BEFORE: " + variable);
 				}
 				// Find the goto Label
 				if (labelNumberMatcher.find()) {
@@ -238,15 +237,14 @@ public class LivenessAnalysis {
 
 				int count = 0;
 				while (variableMatcher.find()) {
-                    System.out.println("we found a variable");
 					if (count == 0) {
 						node.variable = (String) variableMatcher.group(1)
 								.replace(" ", "");
 					} else {
 						String variable = variableMatcher.group(1).replace(" ",
 								"");
-                        System.out.println("Adding livebefore");
 						node.liveBefore.add(variable);
+                        node.readVariables.add(variable);
 					}
 					count++;
 				}

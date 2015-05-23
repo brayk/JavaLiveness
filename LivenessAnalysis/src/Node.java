@@ -15,6 +15,7 @@ public class Node {
 	int gotoNumber = -1;
 	ArrayList<String> liveBefore = new ArrayList<String>();
 	ArrayList<String> liveAfter = new ArrayList<String>();
+    ArrayList<String> readVariables = new ArrayList<String>();
 	
 	public Node()
 	{
