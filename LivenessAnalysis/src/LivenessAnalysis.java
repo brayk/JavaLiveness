@@ -159,7 +159,7 @@ public class LivenessAnalysis {
 
 		// VARIABLE PATTER
 		//String variablePatternString = "( [a-z] | [A-Z] )";
-		String variablePatternString = "( [a-z] | [A-Z] )|( [a-z]$| [A-Z]$)";
+		String variablePatternString = "( [a-z] | [A-Z] )|( [a-z]$| [A-Z]$)|( [a-z]\\z| [A-Z]\\z)";
 		// TOKEN PATTERNS
 		String ifPatternString = "(^ if)";
 		String gotoPatternString = "(^ goto)";
