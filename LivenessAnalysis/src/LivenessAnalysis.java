@@ -158,14 +158,14 @@ public class LivenessAnalysis {
 		int lnNu = 0;
 
 		// VARIABLE PATTER
-		String variablePatternString = "( [a-z] | [A-Z] )";
+		String variablePatternString = "([a-z]|[A-Z])";
 		// TOKEN PATTERNS
 		String ifPatternString = "(^ if)";
 		String gotoPatternString = "(^ goto)";
 		String assignmentPatternString = "([a-z]|[A-Z]) :=.*";
 		String labelPatternString = "^Label.*";
 		String labelNumberPatternString = "(?<=Label)\\d+";
-        String endLivePatternString = "^ #";
+        String endLivePatternString = "(^ #)";
 
 		Pattern ifPattern = Pattern.compile(ifPatternString);
 		Pattern gotoPattern = Pattern.compile(gotoPatternString);
@@ -263,10 +263,13 @@ public class LivenessAnalysis {
                 node = new Node();
                 node.value = strLine;
                 node.type = Node.Type.endLiveType;
+                System.out.println("endlive node value:" + strLine);
                 while(variableMatcher.find()) {
-                    node.liveBefore.add(endLiveMatcher.group(1).replace(" ", ""));
+                    String variable = variableMatcher.group(1).replace(" ", "");
+                    node.liveBefore.add(variable);
                     System.out.println(node.liveBefore + " BEFORE " );
                 }
+                System.out.println("endlive node value:" + strLine);
                 System.out.println(node.liveBefore + " BEFORE " );
             }
 
