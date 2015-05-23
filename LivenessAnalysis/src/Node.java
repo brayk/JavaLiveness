@@ -4,7 +4,7 @@ import java.util.Set;
 
 public class Node {
 	public enum Type{
-		ifType, assignType, labelType, go2Type
+		ifType, assignType, labelType, go2Type, endLiveType
 	}
 	
 	String variable;

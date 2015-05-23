@@ -13,13 +13,20 @@ import java.util.regex.*;
 public class LivenessAnalysis {
 
 	public static void main(String args[]) throws IOException {
-		String file = "./test";
+        String file = args[0];
+        //"./test";
 		ArrayList<Node> nodes = new ArrayList<Node>();
 		HashMap<Integer, Node> headNodes = new HashMap<Integer, Node>();
 
 		nodes = buildNodes(file);
 		headNodes = buildHeadNodes(nodes);
 		buildPrevious(nodes, headNodes);
+        ArrayList<Node> newNodes = new ArrayList<Node>();
+        /*while(newNodes != nodes){
+            newNodes = nodes.copy();
+            propigateLive(nodes);
+            
+        }*/
 		propigateLive(nodes);
 		printLiveness(nodes);
 		
@@ -48,10 +55,19 @@ public class LivenessAnalysis {
 	private static void propigateLive(ArrayList<Node> nodes) {
 		Collections.reverse(nodes);
 		for (Node node : nodes) {
-			for (Node pNode : node.prev) {
+			node.liveBefore.addAll(node.liveAfter);
+            for (Node pNode : node.prev) {
 				System.out.println("because of " + node.value + " adding: " + node.liveBefore + " to " + pNode.value);
 				pNode.liveAfter.addAll(node.liveBefore);
+                
+                if(pNode.liveAfter.contains(node.variable)){
+                    pNode.liveAfter.remove(node.variable);
+                }
 			}
+            
+            if(node.liveBefore.contains(node.variable)){
+                node.liveBefore.remove(node.variable);
+            }
 		}
 		Collections.reverse(nodes);
 
@@ -77,7 +93,6 @@ public class LivenessAnalysis {
 				headNode.prev.add(node);
 				//System.out.println("adding: " + node.value + " as previous to " + headNode.value);
 			}
-
 		}
 	}
 
@@ -111,6 +126,7 @@ public class LivenessAnalysis {
 		String assignmentPatternString = "([a-z]|[A-Z]) :=.*";
 		String labelPatternString = "^Label.*";
 		String labelNumberPatternString = "(?<=Label)\\d+";
+        String endLivePatternString = "^ #";
 
 		Pattern ifPattern = Pattern.compile(ifPatternString);
 		Pattern gotoPattern = Pattern.compile(gotoPatternString);
@@ -118,6 +134,7 @@ public class LivenessAnalysis {
 		Pattern labelPattern = Pattern.compile(labelPatternString);
 
 		Pattern labelNumberPattern = Pattern.compile(labelNumberPatternString);
+        Pattern endLivePattern = Pattern.compile(endLivePatternString);
 		Pattern variablePattern = Pattern.compile(variablePatternString);
 
 		// ASSIGNMENT
@@ -138,6 +155,7 @@ public class LivenessAnalysis {
 			Matcher labelMatcher = labelPattern.matcher(strLine);
 
 			Matcher labelNumberMatcher = labelNumberPattern.matcher(strLine);
+            Matcher endLiveMatcher = endLivePattern.matcher(strLine);
 			Matcher variableMatcher = variablePattern.matcher(strLine);
 			Node node = new Node();
 
@@ -149,7 +167,7 @@ public class LivenessAnalysis {
 				while (variableMatcher.find()) {
 					String variable = variableMatcher.group(1).replace(" ", "");
 					node.liveBefore.add(variable);
-					// System.out.print(variable);
+					System.out.print("BEFORE BEFORE: " + variable);
 				}
 				// Find the goto Label
 				if (labelNumberMatcher.find()) {
@@ -181,12 +199,14 @@ public class LivenessAnalysis {
 
 				int count = 0;
 				while (variableMatcher.find()) {
+                    System.out.println("we found a variable");
 					if (count == 0) {
 						node.variable = (String) variableMatcher.group(1)
 								.replace(" ", "");
 					} else {
 						String variable = variableMatcher.group(1).replace(" ",
 								"");
+                        System.out.println("Adding livebefore");
 						node.liveBefore.add(variable);
 					}
 					count++;
@@ -202,6 +222,16 @@ public class LivenessAnalysis {
 					node.labelNumber = Integer.parseInt(labelNumber);
 				}
 			}
+            if (endLiveMatcher.find()) {
+                node = new Node();
+                node.value = strLine;
+                node.type = Node.Type.endLiveType;
+                while(variableMatcher.find()) {
+                    node.liveBefore.add(endLiveMatcher.group(1).replace(" ", ""));
+                    System.out.println(node.liveBefore + " BEFORE " );
+                }
+                System.out.println(node.liveBefore + " BEFORE " );
+            }
 
 			nodes.add(node);
 
